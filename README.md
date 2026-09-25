@@ -1,1 +1,1 @@
-# event-ticketing-infrastructure
+# Event Ticketing Infrastructure Service
