@@ -20,8 +20,11 @@ All microservices rely on shared infrastructure components (PostgreSQL databases
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
 - Git
 
-Verify Docker installation:
+---
+
+### Step 1: Start Local Infrastructure
+Run the following command directly from the root of this repository to start all containers in detached mode:
+
 ```bash
-docker --version
-docker compose version
+docker compose up -d
 
