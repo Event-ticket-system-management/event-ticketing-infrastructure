@@ -62,16 +62,20 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - kafka_data:/var/lib/kafka/data
     networks:
       - event-ticketing-network
 
 networks:
   event-ticketing-network:
+    name: event-ticketing-network
     driver: bridge
        
 volumes:
   postgres_data:
-  redis_data:    
+  redis_data:
+  kafka_data:
          
 
   
