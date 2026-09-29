@@ -1,2 +1,22 @@
 services:
-  
+  user-service:
+    build:
+      context: ../event-ticketing-user-service
+      dockerfile: Dockerfile
+    image: event-ticketing-user-service:1.0.0
+    container_name: user-service-container
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_URL=jdbc:postgresql://postgres:5432/${USER_DB_NAME}
+      - DB_USERNAME=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - SERVER_PORT=${SERVER_PORT}
+    networks:
+      - event-ticketing-network
+    restart: unless-stopped
+
+networks:
+  event-ticketing-network:
+    name: event-ticketing-network
+    external: true
