@@ -1,0 +1,37 @@
+# Local execution & state
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Terraform Plan outputs
+*.tfplan
+
+# Terraform Variable overrides / Secrets
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI Configuration File
+.terraformrc
+terraform.rc
+
+# Kubeconfig / Secrets
+kubeconfig
+*.kubeconfig
+secrets/
+
+# IDE specific files
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# db infor .env
+.env
