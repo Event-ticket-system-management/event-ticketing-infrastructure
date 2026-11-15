@@ -35,3 +35,5 @@ Thumbs.db
 
 # db infor .env
 .env
+jwt-secrert.yaml
+postgres-secrert.yaml
