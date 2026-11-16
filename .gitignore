@@ -35,5 +35,7 @@ Thumbs.db
 
 # db infor .env
 .env
-jwt-secrert.yaml
-postgres-secrert.yaml
+k8s/base/jwt-secrert.yaml
+k8s/base/postgres-secrert.yaml
+k8s/base/redis-secret.yaml
+
