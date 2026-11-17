@@ -1,0 +1,57 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: payment-service-migration-v1
+  namespace: event-ticketing-dev
+  labels:
+    app: payment-service-migration
+    app.kubernetes.io/part-of: event-ticketing
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        app: payment-service-migration
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migration
+          image: event-ticketing-payment-service:1.0.1
+          imagePullPolicy: IfNotPresent
+          command:
+            - ./node_modules/.bin/typeorm
+            - migration:run
+            - -d
+            - dist/database/data-source.js
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          envFrom:
+            - configMapRef:
+                name: payment-service-config
+          env:
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: POSTGRES_PASSWORD
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
