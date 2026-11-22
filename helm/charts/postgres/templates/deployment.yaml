@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: event-ticketing
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: {{ .Values.deployment.strategy }}
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        app.kubernetes.io/name: postgres
+        app.kubernetes.io/component: database
+    spec:
+      containers:
+        - name: postgres
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          ports:
+            - name: postgres
+              containerPort: {{ .Values.database.port }}
+              protocol: TCP
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret.name }}
+                  key: {{ .Values.existingSecret.usernameKey }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecret.name }}
+                  key: {{ .Values.existingSecret.passwordKey }}
+            - name: POSTGRES_DB
+              value: {{ .Values.database.name }}
+            - name: PGDATA
+              value: {{ .Values.database.pgdata | quote }}
+          resources:
+{{ toYaml .Values.resources | nindent 12 }}
+          startupProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+          volumeMounts:
+            {{- if .Values.persistence.enabled }}
+              - name: postgres-data
+                mountPath: {{ .Values.persistence.mountPath }}
+            {{- end }}
+            {{- if .Values.initSql.enabled }}
+              - name: init-sql-volume
+                mountPath: {{ .Values.initSql.mountPath }}
+                readOnly: true
+            {{- end }}
+      volumes:
+        {{- if .Values.persistence.enabled }}
+       - name: postgres-data
+         persistentVolumeClaim:
+           claimName: {{ .Values.persistence.claimName }}
+        {{- end }}
+        {{- if .Values.initSql.enabled }}
+       - name: init-sql-volume
+         configMap:
+           name: {{ .Values.initSql.configMapName }}
+        {{- end }}
+
+
+
