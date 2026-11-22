@@ -1,0 +1,41 @@
+replicaCount: 1
+image:
+  repository: postgres
+  tag: "16-alpine"
+  pullPolicy: IfNotPresent
+database:
+  name: event_ticketing
+  port: 5432
+  pgdata: /var/lib/postgresql/data/pgdata
+existingSecret:
+  name: postgres-credentials
+  usernameKey: POSTGRES_USER
+  passwordKey: POSTGRES_PASSWORD
+service:
+  type: ClusterIP
+  port: 5432
+persistence:
+  enabled: true
+  claimName: postgres-pvc
+  size: 5Gi
+  accessMode: ReadWriteOnce
+  mountPath: /var/lib/postgresql/data
+initSql:
+  enabled: true
+  configMapName: postgres-init-sql
+  mountPath: /docker-entrypoint-initdb.d
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 200m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+startupProbe:
+  periodSeconds: 5
+  failureThreshold: 30
+readinessProbe:
+  periodSeconds: 10
+  timeoutSeconds: 3
+deployment:
+  strategy: Recreate
