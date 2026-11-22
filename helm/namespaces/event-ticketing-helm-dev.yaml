@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: event-ticketing-helm-dev
+  labels:
+    app.kubernetes.io/part-of: event-ticketing
+    environment: development
+    managed-by: infrastructure
