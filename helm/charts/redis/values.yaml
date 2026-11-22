@@ -1,0 +1,51 @@
+replicaCount: 1
+image:
+  repository: redis
+  tag: "7-alpine"
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  port: 6379
+  targetPort: 6379
+existingSecret:
+  name: redis-secret
+  passwordKey: REDIS_PASSWORD
+redis:
+  maxmemory: 80mb
+  maxmemoryPolicy: allkeys-lru
+  persistence:
+    save: ""
+    appendonly: "no"
+deployment:
+  strategy:
+    type: Recreate
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+resources:
+  requests:
+    memory: 128Mi
+    cpu: 100m
+  limits:
+    memory: 256Mi
+    cpu: 250m
+startupProbe:
+  periodSeconds: 5
+  timeoutSeconds: 2
+  failureThreshold: 30
+readinessProbe:
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+livenessProbe:
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
