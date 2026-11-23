@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: booking-service-config
+  namespace: {{ .Release.Namespace }}
+data:
+  SERVER_PORT: {{ .Values.config.serverPort | quote }}
+  DB_URL: {{ .Values.config.dbUrl | quote }}
+  REDIS_HOST: {{ .Values.config.redisHost | quote }}
+  REDIS_PORT: {{ .Values.config.redisPort | quote }}
+  KAFKA_BOOTSTRAP_SERVERS: {{ .Values.config.kafkaBootstrapServers | quote }}
+  EVENT_SERVICE_URL: {{ .Values.config.eventServiceUrl | quote }}
+  JAVA_TOOL_OPTIONS: {{ .Values.config.javaToolOptions | quote }}
