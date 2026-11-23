@@ -1,8 +1,8 @@
 services:
   user-service:
     build:
-      context: ../event-ticketing-user-service
-      dockerfile: Dockerfile
+      context: ../../event-ticketing-user-service
+      dockerfile: ../../event-ticketing-user-service/Dockerfile
     image: event-ticketing-user-service:1.0.0
     container_name: user-service-container
     ports:
