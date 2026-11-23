@@ -1,0 +1,13 @@
+{{- if .Values.initSql.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.initSql.configMapName }}
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: event-ticketing
+data:
+  init-databases.sql: |
+{{ .Files.Get "files/init-databases.sql" | indent 4 }}
+{{- end }}

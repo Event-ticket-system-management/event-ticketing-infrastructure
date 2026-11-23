@@ -1,0 +1,62 @@
+replicaCount: 1
+image:
+  repository: event-ticketing-api-gateway
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+config:
+  serverPort: "9090"
+  userServiceUrl: "http://user-service:8081"
+  eventServiceUrl: "http://event-service:8082"
+  bookingServiceUrl: "http://booking-service:8083"
+  javaToolOptions: "-XX:MaxRAMPercentage=75.0"
+existingSecret:
+  name: jwt-secret
+  key: JWT_SECRET
+service:
+  type: NodePort
+  port: 9090
+  targetPort: 9090
+  nodePort: 30080
+deployment:
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+pod:
+  terminationGracePeriodSeconds: 30
+  automountServiceAccountToken: false
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 999
+  runAsGroup: 999
+  seccompProfile:
+    type: RuntimeDefault
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 200m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+startupProbe:
+  path: /actuator/health/liveness
+  failureThreshold: 24
+  periodSeconds: 5
+  timeoutSeconds: 4
+readinessProbe:
+  path: /actuator/health/readiness
+  periodSeconds: 10
+  failureThreshold: 3
+  timeoutSeconds: 4
+livenessProbe:
+  path: /actuator/health/liveness
+  periodSeconds: 15
+  failureThreshold: 3
+  timeoutSeconds: 4

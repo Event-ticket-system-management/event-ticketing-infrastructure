@@ -1,0 +1,56 @@
+replicaCount: 2
+image:
+  repository: event-ticketing-user-service
+  tag: "1.0.1"
+  pullPolicy: IfNotPresent
+config:
+  serverPort: "8081"
+  dbUrl: "jdbc:postgresql://postgres:5432/user_db"
+  javaToolOptions: "-XX:MaxRAMPercentage=75.0"
+existingSecrets:
+  postgres:
+    name: postgres-credentials
+    usernameKey: POSTGRES_USER
+    passwordKey: POSTGRES_PASSWORD
+  jwt:
+    name: jwt-secret
+    key: JWT_SECRET
+service:
+  type: ClusterIP
+  port: 8081
+  targetPort: 8081
+deployment:
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+pod:
+  terminationGracePeriodSeconds: 30
+initContainer:
+  enabled: true
+  name: wait-for-postgres
+  image: busybox:1.36
+  postgresHost: postgres
+  postgresPort: 5432
+  retryIntervalSeconds: 2
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 200m
+  limits:
+    memory: 512Mi
+    cpu: 500m
+startupProbe:
+  path: /actuator/health/liveness
+  failureThreshold: 24
+  periodSeconds: 5
+readinessProbe:
+  path: /actuator/health/readiness
+  periodSeconds: 10
+  failureThreshold: 3
+livenessProbe:
+  path: /actuator/health/liveness
+  periodSeconds: 15
+  failureThreshold: 3
