@@ -1,0 +1,16 @@
+replicaCount: 1
+image:
+  tag: "7-alpine"
+redis:
+  maxmemory: 80mb
+  maxmemoryPolicy: allkeys-lru
+  persistence:
+    save: ""
+    appendonly: "no"
+resources:
+  requests:
+    memory: 128Mi
+    cpu: 100m
+  limits:
+    memory: 256Mi
+    cpu: 250m
