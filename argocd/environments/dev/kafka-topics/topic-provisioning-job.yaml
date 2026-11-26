@@ -1,0 +1,92 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kafka-topic-provisioning
+  namespace: event-ticketing-argocd-dev
+  labels:
+    app.kubernetes.io/name: kafka-topic-provisioning
+    app.kubernetes.io/component: messaging
+    app.kubernetes.io/part-of: event-ticketing
+    environment: dev
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 3
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: kafka-topic-provisioning
+        app.kubernetes.io/component: messaging
+        app.kubernetes.io/part-of: event-ticketing
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      containers:
+        - name: kafka-topic-provisioning
+          image: confluentinc/cp-kafka:7.5.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: KAFKA_BOOTSTRAP_SERVER
+              value: "kafka:9092"
+
+            - name: KAFKA_TOPIC_PARTITIONS
+              value: "3"
+
+            - name: KAFKA_TOPIC_REPLICATION_FACTOR
+              value: "1"
+          command:
+            - /bin/bash
+            - -ec
+          args:
+            - |
+              echo "Starting Kafka topic provisioning..."
+
+              echo "Waiting for Kafka broker..."
+
+              until kafka-broker-api-versions \
+                --bootstrap-server "$KAFKA_BOOTSTRAP_SERVER" \
+                >/dev/null 2>&1; do
+                echo "Kafka broker is not ready. Retrying..."
+                sleep 5
+              done
+
+              echo "Kafka broker is ready."
+
+              for topic in \
+                booking.create \
+                payment.completed \
+                payment.failed
+              do
+                echo "Ensuring topic exists: $topic"
+
+                kafka-topics \
+                  --bootstrap-server "$KAFKA_BOOTSTRAP_SERVER" \
+                  --create \
+                  --if-not-exists \
+                  --topic "$topic" \
+                  --partitions "$KAFKA_TOPIC_PARTITIONS" \
+                  --replication-factor "$KAFKA_TOPIC_REPLICATION_FACTOR"
+              done
+
+              echo "Kafka topic provisioning completed."
+
+              echo "Current Kafka topics:"
+
+              kafka-topics \
+                --bootstrap-server "$KAFKA_BOOTSTRAP_SERVER" \
+                --list
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
