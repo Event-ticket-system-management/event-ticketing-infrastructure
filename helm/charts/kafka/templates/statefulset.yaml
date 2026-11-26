@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kafka
+    app.kubernetes.io/name: kafka
+    app.kubernetes.io/component: messaging
+spec:
+  serviceName: {{ .Values.headlessService.name }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+        app.kubernetes.io/name: kafka
+        app.kubernetes.io/component: messaging
+    spec:
+      enableServiceLinks: {{ .Values.pod.enableServiceLinks }}
+      terminationGracePeriodSeconds: {{ .Values.pod.terminationGracePeriodSeconds }}
+      containers:
+        - name: kafka
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: broker
+              containerPort: {{ .Values.kafka.listeners.brokerPort }}
+            - name: controller
+              containerPort: {{ .Values.kafka.listeners.controllerPort }}
+          env:
+            - name: KAFKA_NODE_ID
+              value: {{ .Values.kafka.nodeId | quote }}
+
+            - name: KAFKA_PROCESS_ROLES
+              value: {{ .Values.kafka.processRoles | quote }}
+
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: {{ .Values.kafka.listeners.securityProtocolMap | quote }}
+
+            - name: KAFKA_LISTENERS
+              value: "PLAINTEXT://0.0.0.0:{{ .Values.kafka.listeners.brokerPort }},CONTROLLER://0.0.0.0:{{ .Values.kafka.listeners.controllerPort }}"
+
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "PLAINTEXT://kafka-0.{{ .Values.headlessService.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.kafka.listeners.brokerPort }}"
+
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: {{ .Values.kafka.listeners.interBrokerListenerName | quote }}
+
+            - name: KAFKA_HEAP_OPTS
+              value: {{ .Values.kafka.heapOpts | quote }}
+
+            - name: KAFKA_CONTROLLER_LISTENER_NAMES
+              value: {{ .Values.kafka.listeners.controllerListenerNames | quote }}
+
+            - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+              value: "{{ .Values.kafka.nodeId }}@kafka-0.{{ .Values.headlessService.name }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.kafka.listeners.controllerPort }}"
+
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: {{ .Values.kafka.offsetsTopicReplicationFactor | quote }}
+
+            - name: KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS
+              value: {{ .Values.kafka.offsetsTopicNumPartitions | quote }}
+
+            - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+              value: {{ .Values.kafka.transactionStateLogMinIsr | quote }}
+
+            - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+              value: {{ .Values.kafka.transactionStateLogReplicationFactor | quote }}
+
+            - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+              value: {{ .Values.kafka.autoCreateTopicsEnable | quote }}
+
+            - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+              value: {{ .Values.kafka.groupInitialRebalanceDelayMs | quote }}
+
+            - name: KAFKA_LOG_DIRS
+              value: {{ .Values.kafka.logDirs | quote }}
+
+            - name: CLUSTER_ID
+              value: {{ .Values.kafka.clusterId | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          startupProbe:
+            tcpSocket:
+              port: broker
+            periodSeconds: {{ .Values.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.startupProbe.failureThreshold }}
+          readinessProbe:
+            exec:
+              command:
+                - /bin/bash
+                - -ec
+                - |
+                  kafka-broker-api-versions \
+                    --bootstrap-server localhost:{{ .Values.kafka.listeners.brokerPort }} >/dev/null
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+          livenessProbe:
+            tcpSocket:
+              port: broker
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+          volumeMounts:
+            - name: kafka-data
+              mountPath: {{ .Values.storage.mountPath }}
+      volumes:
+        - name: kafka-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.storage.existingClaim }}

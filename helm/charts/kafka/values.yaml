@@ -1,0 +1,57 @@
+replicaCount: 1
+image:
+  repository: confluentinc/cp-kafka
+  tag: "7.5.0"
+  pullPolicy: IfNotPresent
+service:
+  type: ClusterIP
+  name: kafka
+  port: 9092
+headlessService:
+  name: kafka-headless
+  publishNotReadyAddresses: true
+kafka:
+  nodeId: "1"
+  processRoles: "broker,controller"
+  listeners:
+    brokerPort: 9092
+    controllerPort: 9093
+    securityProtocolMap: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+    interBrokerListenerName: "PLAINTEXT"
+    controllerListenerNames: "CONTROLLER"
+  heapOpts: "-Xms512m -Xmx512m"
+  clusterId: "MkU3OEVBNTcwNTJENDM2Qk"
+  offsetsTopicReplicationFactor: "1"
+  offsetsTopicNumPartitions: "1"
+  transactionStateLogMinIsr: "1"
+  transactionStateLogReplicationFactor: "1"
+  autoCreateTopicsEnable: "false"
+  groupInitialRebalanceDelayMs: "0"
+  logDirs: "/var/lib/kafka/data"
+storage:
+  existingClaim: kafka-pvc
+  accessMode: ReadWriteOnce
+  storageClassName: standard
+  size: 5Gi
+  mountPath: /var/lib/kafka/data
+pod:
+  enableServiceLinks: false
+  terminationGracePeriodSeconds: 60
+resources:
+  requests:
+    memory: 768Mi
+    cpu: 250m
+  limits:
+    memory: 1536Mi
+    cpu: 1000m
+startupProbe:
+  periodSeconds: 10
+  failureThreshold: 30
+readinessProbe:
+  periodSeconds: 10
+  timeoutSeconds: 10
+  failureThreshold: 3
+livenessProbe:
+  periodSeconds: 20
+  timeoutSeconds: 5
+  failureThreshold: 3

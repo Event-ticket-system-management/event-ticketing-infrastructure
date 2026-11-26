@@ -1,0 +1,6 @@
+apiVersion: v2
+name: booking-service
+description: Spring Boot Booking Service Helm chart for the Event Ticketing System
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

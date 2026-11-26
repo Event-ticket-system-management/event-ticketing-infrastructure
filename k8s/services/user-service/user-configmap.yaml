@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-service-config
+  namespace: event-ticketing-dev
+  labels:
+    app.kubernetes.io/name: user-service
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/part-of: event-ticketing
+data:
+  SERVER_PORT: "8081"
+  DB_URL: "jdbc:postgresql://postgres:5432/user_db"
+  JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=75.0"

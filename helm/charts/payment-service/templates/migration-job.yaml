@@ -1,0 +1,61 @@
+{{- if .Values.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: payment-service-migration
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: payment-service-migration
+    app.kubernetes.io/part-of: event-ticketing
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": {{ .Values.migration.hook.weight | quote }}
+    "helm.sh/hook-delete-policy": {{ .Values.migration.hook.deletePolicy | quote }}
+spec:
+  backoffLimit: {{ .Values.migration.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.migration.activeDeadlineSeconds }}
+  template:
+    metadata:
+      labels:
+        app: payment-service-migration
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migration
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+{{ toYaml .Values.migration.command | indent 12 }}
+          securityContext:
+{{ toYaml .Values.securityContext | indent 12 }}
+          env:
+            - name: PORT
+              value: {{ .Values.config.port | quote }}
+
+            - name: DB_HOST
+              value: {{ .Values.config.dbHost | quote }}
+
+            - name: DB_PORT
+              value: {{ .Values.config.dbPort | quote }}
+
+            - name: DB_NAME
+              value: {{ .Values.config.dbName | quote }}
+
+            - name: KAFKA_BROKERS
+              value: {{ .Values.config.kafkaBrokers | quote }}
+
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecrets.postgres.name }}
+                  key: {{ .Values.existingSecrets.postgres.usernameKey }}
+
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.existingSecrets.postgres.name }}
+                  key: {{ .Values.existingSecrets.postgres.passwordKey }}
+
+          resources:
+{{ toYaml .Values.migration.resources | indent 12 }}
+{{- end }}
