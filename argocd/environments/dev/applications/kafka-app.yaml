@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: event-ticketing-dev-kafka
+  namespace: argocd
+spec:
+  project: event-ticketing-dev
+  sources:
+    - repoURL: https://github.com/Event-ticket-system-management/event-ticketing-infrastructure.git
+      targetRevision: main
+      path: helm/charts/kafka
+      helm:
+        releaseName: kafka
+        valueFiles:
+          - $values/argocd/environments/dev/values/kafka-values.yaml
+    - repoURL: https://github.com/Event-ticket-system-management/event-ticketing-infrastructure.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: event-ticketing-argocd-dev
