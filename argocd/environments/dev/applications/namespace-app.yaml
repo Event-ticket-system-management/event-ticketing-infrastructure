@@ -8,10 +8,7 @@ spec:
   source:
     repoURL: https://github.com/Event-ticket-system-management/event-ticketing-infrastructure.git
     targetRevision: main
-    path: argocd/environment/dev/namespace
+    path: argocd/environments/dev/namespaces
   destination:
     server: https://kubernetes.default.svc
-    namespace: event-ticketing-argo-dev
-  syncPolicy:
-    syncOptions:
-      - Prune=false
+    namespace: event-ticketing-argocd-dev
