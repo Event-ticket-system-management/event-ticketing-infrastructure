@@ -1,0 +1,19 @@
+replicaCount: 1
+image:
+  tag: "7.5.0"
+kafka:
+  heapOpts: "-Xms512m -Xmx512m"
+  offsetsTopicReplicationFactor: "1"
+  offsetsTopicNumPartitions: "1"
+  transactionStateLogMinIsr: "1"
+  transactionStateLogReplicationFactor: "1"
+  autoCreateTopicsEnable: "false"
+storage:
+  size: 5Gi
+resources:
+  requests:
+    memory: 768Mi
+    cpu: 250m
+  limits:
+    memory: 1536Mi
+    cpu: 1000m
