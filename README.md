@@ -3,7 +3,7 @@
 
 Infrastructure configuration and deployment resources for the **Event Ticketing System**, a microservices-based application built with Spring Boot and NestJS.
 
-This repository supports local development with Docker Compose and a multi-node Kubernetes environment using **Kind**. It also contains reusable Helm charts for a separate Kind-based deployment environment and serves as the home for planned cloud infrastructure, deployment automation, and observability work.
+This repository supports local development with Docker Compose and a multi-node Kubernetes environment using **Kind**. It also contains reusable Helm charts for a separate Kind-based deployment environment and serves as the home for planned cloud infrastructure, deployment automation, and observabilit work.
 
 ## Current implementation status
 
