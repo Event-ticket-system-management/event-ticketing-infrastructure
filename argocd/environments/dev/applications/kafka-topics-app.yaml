@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: event-ticketing-dev-kafka-topics
+  namespace: argocd
+spec:
+  project: event-ticketing-dev
+  source:
+    repoURL: https://github.com/Event-ticket-system-management/event-ticketing-infrastructure.git
+    targetRevision: main
+    path: argocd/environments/dev/kafka-topics
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: event-ticketing-argocd-dev
