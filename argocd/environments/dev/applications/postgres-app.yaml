@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: event-ticketing-dev-postgres
+  namespace: argocd
+spec:
+  project: event-ticketing-dev
+  sources:
+    - repoURL: https://github.com/Event-ticket-system-management/event-ticketing-infrastructure.git
+      targetRevision: main
+      path: helm/charts/postgres
+      helm:
+        releaseName: postgres
+        valueFiles:
+          - $values/argocd/environments/dev/values/postgres-values.yaml
+
+    - repoURL: https://github.com/Event-ticket-system-management/event-ticketing-infrastructure.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: event-ticketing-argocd-dev
