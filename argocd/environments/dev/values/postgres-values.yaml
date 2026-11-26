@@ -1,0 +1,12 @@
+replicaCount: 1
+image:
+  tag: "16-alpine"
+persistence:
+  size: 5Gi
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 200m
+  limits:
+    memory: 512Mi
+    cpu: 500m
