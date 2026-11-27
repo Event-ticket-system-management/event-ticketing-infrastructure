@@ -1,0 +1,16 @@
+replicaCount: 2
+image:
+  repository: event-ticketing-user-service
+  tag: "1.0.1"
+  pullPolicy: IfNotPresent
+config:
+  serverPort: "8081"
+  dbUrl: "jdbc:postgresql://postgres:5432/user_db"
+  javaToolOptions: "-XX:MaxRAMPercentage=75.0"
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 200m
+  limits:
+    memory: 512Mi
+    cpu: 500m
