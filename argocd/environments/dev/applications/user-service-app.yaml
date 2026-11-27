@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: event-ticketing-dev-user-service
+  namespace: argocd
+spec:
+  project: event-ticketing-dev
+  sources:
+    - repoURL: https://github.com/Event-ticket-system-management/event-ticketing-infrastructure.git
+      targetRevision: main
+      path: helm/charts/user-service
+      helm:
+        releaseName: user-service
+        valueFiles:
+          - $values/argocd/environments/dev/values/user-service-values.yaml
+
+    - repoURL: https://github.com/Event-ticket-system-management/event-ticketing-infrastructure.git
+      targetRevision: main
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: event-ticketing-argocd-dev
