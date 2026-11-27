@@ -1,4 +1,4 @@
-replicaCount: 2
+replicaCount: 0
 image:
   repository: event-ticketing-booking-service
   tag: "1.0.0"
