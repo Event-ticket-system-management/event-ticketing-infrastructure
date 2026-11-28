@@ -1,0 +1,22 @@
+replicaCount: 2
+image:
+  repository: event-ticketing-api-gateway
+  tag: "1.0.0"
+  pullPolicy: IfNotPresent
+config:
+  serverPort: "9090"
+  userServiceUrl: "http://user-service:8081"
+  eventServiceUrl: "http://event-service:8082"
+  bookingServiceUrl: "http://booking-service:8083"
+service:
+  type: NodePort
+  port: 9090
+  targetPort: 9090
+  nodePort: 30080
+resources:
+  requests:
+    memory: 256Mi
+    cpu: 200m
+  limits:
+    memory: 512Mi
+    cpu: 500m
